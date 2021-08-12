@@ -1,2 +1,2 @@
 # linux_audio
-Linux audio framework from deej 
+deej for linux in Python  
