@@ -19,7 +19,7 @@ def main():
     ser.readline()
     while True:
         line = read_from_serial(ser)
-        print(line)
+        print([round(values_into_percent(int(x), 1023), 2) for x in line])
 
 
 if __name__ == "__main__":
