@@ -1,6 +1,5 @@
 import serial
 import yaml
-
 import pulsectl
 
 
@@ -9,9 +8,12 @@ class Potentiometer():
         self.app_name = app_name
         self.number = number
 
-    def update_volume(self, new_volume):
+    def update_volume(self, new_volume, pulse):
         self.volume = new_volume
-        # pulsectl
+        # pulsectl #only output
+        for sink in pulse.sink_input_list():
+            if sink.proplist.get('application.process.binary') == self.app_name:
+                pulse.volume_set_all_chans(sink, self.volume)
 
 
 class Configuration():
@@ -34,16 +36,21 @@ def values_into_percent(value, max_val):
 
 
 def read_from_serial(ser):
-    line = ser.readline()
-    # except serial.serialutil.SerialException:
-    split_line = line.decode()[:len(line)-2].split('|')  # from 0 to 1023
-    # print(line)
+    try:
+        line = ser.readline()
+        split_line = line.decode()[:len(line)-2].split('|')  # from 0 to 1023
+    except serial.serialutil.SerialException:
+        print("Can't read from serial. Maybe something is unplugged")
     return split_line
 
 
-def update_volumes(config, values):
-    for (p, v) in config.list_of_potentiometers, values:
-        p.update_volume(v)
+def update_volumes(config, values, pulse):
+    for (p, v) in zip(config.list_of_potentiometers, values):
+        if v <= 0.02:
+            v = 0
+        if v >= 0.98:
+            v = 1
+        p.update_volume(v, pulse)
 
 
 def main():
@@ -51,12 +58,12 @@ def main():
     c.load_configuration('config.yaml')
     ser = serial.Serial(port='/dev/ttyUSB0')
     ser.readline()
-    #pulse = pulsectl.Pulse()
+    pulse = pulsectl.Pulse()
 
     while True:
         line = read_from_serial(ser)
         values = [round(values_into_percent(int(x), 1023), 2) for x in line]
-        update_volumes(c, values)
+        update_volumes(c, values, pulse)
 
 
 if __name__ == "__main__":
