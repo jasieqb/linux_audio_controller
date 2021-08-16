@@ -1,8 +1,13 @@
 number_of_sliders: 5
+
 slider_mapping:
-  - spotify
-  - chrome
-  - discord
-  - mic
-  - other
+#case INsensitive
+#in
+  - spotify|out
+  - chrome|out
+  - discord|out
+  #out
+  #TODO
+  - discord|in
+  - other|in
   

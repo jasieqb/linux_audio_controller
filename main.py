@@ -4,16 +4,23 @@ import pulsectl
 
 
 class Potentiometer():
-    def __init__(self, number, app_name):
+    def __init__(self, number: int, app_name: str, out: bool):
+        self.out = out
         self.app_name = app_name
         self.number = number
 
     def update_volume(self, new_volume, pulse):
         self.volume = new_volume
-        # pulsectl #only output
-        for sink in pulse.sink_input_list():
-            if sink.proplist.get('application.process.binary') == self.app_name:
-                pulse.volume_set_all_chans(sink, self.volume)
+        # output
+        if self.out:
+            for sink in pulse.sink_input_list():
+                if sink.proplist.get('application.process.binary').lower() == self.app_name.lower():
+                    pulse.volume_set_all_chans(sink, self.volume)
+        # input
+        else:
+            for source in pulse.source_output_list():
+                if source.proplist.get('application.process.binary').lower() == self.app_name.lower():
+                    pulse.volume_set_all_chans(source, self.volume)
 
 
 class Configuration():
@@ -27,8 +34,25 @@ class Configuration():
             self.number_of_sliders = self.config['number_of_sliders']
             i = 0
             for p in self.config['slider_mapping']:
-                self.list_of_potentiometers.append(Potentiometer(i, p))
+                name, out = p.split('|')
+                if out == 'out':
+                    out = True
+                else:
+                    out = False
+                self.list_of_potentiometers.append(Potentiometer(i, name, out))
                 i += 1
+
+    def print_config(self):
+        print("=========CONFIG=========")
+        print("N\tNAME\t     DIRECTIONS")
+        for p in self.list_of_potentiometers:
+            if p.out:
+                o = "output"
+            else:
+                o = "input"
+            print("{}:\t{:<8}\t{}".format(
+                p.number, p.app_name, o))
+        print("=========END=========")
 
 
 def values_into_percent(value, max_val):
@@ -56,6 +80,7 @@ def update_volumes(config, values, pulse):
 def main():
     c = Configuration()
     c.load_configuration('config.yaml')
+    c.print_config()
     ser = serial.Serial(port='/dev/ttyUSB0')
     ser.readline()
     pulse = pulsectl.Pulse()
