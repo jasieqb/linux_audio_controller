@@ -1,0 +1,8 @@
+number_of_sliders: 5
+slider_mapping:
+  - spotify
+  - chrome
+  - discord
+  - mic
+  - other
+  
