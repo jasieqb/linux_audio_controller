@@ -8,7 +8,10 @@ slider_mapping:
   - discord|out
   #out
   #TODO
-  - discord|in
+  #- discord|in
   - other|in
+  - other|out
+  #other|in/out
   #main|in/out
-  #wholename
+  #whole name of speakers
+  

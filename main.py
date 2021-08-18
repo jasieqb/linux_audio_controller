@@ -10,36 +10,29 @@ class Potentiometer():
         self.app_name = app_name
         self.number = number
 
-    def update_volume(self, new_volume, pulse):
+    def set_out(self, new_out):
+        self.out = new_out
+
+    def update_volume(self, new_volume):
         self.volume = new_volume
         # output
-        if self.app_name == 'other':
-            if self.out:
-                for sink in pulse.sink_input_list():
-                    if sink.proplist.get('application.process.binary').lower() == self.app_name.lower():
-                        pulse.volume_set_all_chans(sink, self.volume)
-            # input
-            else:
-                for source in pulse.source_output_list():
-                    if source.proplist.get('application.process.binary').lower() == self.app_name.lower():
-                        pulse.volume_set_all_chans(source, self.volume)
-        elif self.app_name == '':
-            pass
+        """if self.out:
+            for sink in pulse.sink_input_list():
+                if sink.proplist.get('application.process.binary').lower() == self.app_name.lower():
+                    pulse.volume_set_all_chans(sink, self.volume)
+        # input
         else:
-            if self.out:
-                for sink in pulse.sink_input_list():
-                    if sink.proplist.get('application.process.binary').lower() == self.app_name.lower():
-                        pulse.volume_set_all_chans(sink, self.volume)
-            # input
-            else:
-                for source in pulse.source_output_list():
-                    if source.proplist.get('application.process.binary').lower() == self.app_name.lower():
-                        pulse.volume_set_all_chans(source, self.volume)
+            for source in pulse.source_output_list():
+                if source.proplist.get('application.process.binary').lower() == self.app_name.lower():
+                    pulse.volume_set_all_chans(source, self.volume)"""
 
 
 class Configuration():
     def __init__(self):
-        pass
+        self._other_in = {}
+        self._other_out = {}
+        self._in = {}
+        self._out = {}
 
     def load_configuration(self, conf_file):
         self.list_of_potentiometers = []
@@ -49,11 +42,19 @@ class Configuration():
             i = 0
             for p in self.config['slider_mapping']:
                 name, out = p.split('|')
-                if out == 'out':
-                    out = True
+                name = name.lower()
+                tmp_p = Potentiometer(i, name, out == 'out')
+                if name != 'other':
+                    if out == 'out':
+                        self._out[name] = tmp_p
+                    else:
+                        self._in[name] = tmp_p
                 else:
-                    out = False
-                self.list_of_potentiometers.append(Potentiometer(i, name, out))
+                    if out == 'out':
+                        self._other_out[name] = tmp_p
+                    else:
+                        self._other_in[name] = tmp_p
+                self.list_of_potentiometers.append(tmp_p)
                 i += 1
 
     def print_config(self):
@@ -82,6 +83,7 @@ def read_from_serial(ser):
     return split_line
 
 
+"""
 def update_volumes(config, values, pulse):
     for (p, v) in zip(config.list_of_potentiometers, values):
         if v <= 0.02:
@@ -89,6 +91,28 @@ def update_volumes(config, values, pulse):
         if v >= 0.98:
             v = 1
         p.update_volume(v, pulse)
+"""
+
+
+def update_volumes(config: Configuration, values: list, pulse: pulsectl.Pulse):
+    for (p, v) in zip(config.list_of_potentiometers, values):
+        p.update_volume(v)
+    # out
+    for sink in pulse.sink_input_list():
+        tmp_name = sink.proplist.get('application.process.binary').lower()
+        if tmp_name in config._out:
+            pulse.volume_set_all_chans(sink, config._out[tmp_name].volume)
+        elif config._other_out:
+            pulse.volume_set_all_chans(
+                sink, config._other_out['other'].volume)
+    # in
+    for source in pulse.source_output_list():
+        tmp_name = source.proplist.get('application.process.binary').lower()
+        if tmp_name in config._in:
+            pulse.volume_set_all_chans(source, config._out[tmp_name].volume)
+        elif config._other_in:
+            pulse.volume_set_all_chans(
+                source, config._other_in['other'].volume)
 
 
 def main():
@@ -99,11 +123,11 @@ def main():
     ser.readline()
     pulse = pulsectl.Pulse()
 
-    while True:
+    while 1:  # True: podobno szybciej
         line = read_from_serial(ser)
-        values = [round(values_into_percent(int(x), 1023), 2) for x in line]
+        values = [round(values_into_percent(int(x), 1023), 3) for x in line]
         update_volumes(c, values, pulse)
-        sleep(0.01)
+        # sleep(0.001)
 
 
 if __name__ == "__main__":
