@@ -1,17 +1,18 @@
-number_of_sliders: 5
-
+number_of_sliders: 7
+invert: rue
 slider_mapping:
 #case INsensitive
 #in
-  - spotify|out
+#-
+  - -|spotify|out
   - chrome|out
   - discord|out
-  #out
-  #TODO
-  #- discord|in
-  - other|in
   - other|out
-  #other|in/out
+  #out
+  - discord|in
+  - teams|in
+  - other|in
+  #TODO
+  #grupowanie
   #main|in/out
   #whole name of speakers
-  

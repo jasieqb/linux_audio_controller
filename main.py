@@ -5,26 +5,18 @@ from time import sleep
 
 
 class Potentiometer():
-    def __init__(self, number: int, app_name: str, out: bool):
+    def __init__(self, number: int, app_name: str, out: bool, invert: bool):
         self.out = out
         self.app_name = app_name
         self.number = number
+        self.invert = invert
 
     def set_out(self, new_out):
         self.out = new_out
 
     def update_volume(self, new_volume):
         self.volume = new_volume
-        # output
-        """if self.out:
-            for sink in pulse.sink_input_list():
-                if sink.proplist.get('application.process.binary').lower() == self.app_name.lower():
-                    pulse.volume_set_all_chans(sink, self.volume)
-        # input
-        else:
-            for source in pulse.source_output_list():
-                if source.proplist.get('application.process.binary').lower() == self.app_name.lower():
-                    pulse.volume_set_all_chans(source, self.volume)"""
+        #print(new_volume, " ,", end="")
 
 
 class Configuration():
@@ -35,25 +27,54 @@ class Configuration():
         self._out = {}
 
     def load_configuration(self, conf_file):
+        self.invert = False
         self.list_of_potentiometers = []
         with open(conf_file, 'r') as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
+            self.invert = self.config['invert']
             self.number_of_sliders = self.config['number_of_sliders']
             i = 0
-            for p in self.config['slider_mapping']:
-                name, out = p.split('|')
-                name = name.lower()
-                tmp_p = Potentiometer(i, name, out == 'out')
-                if name != 'other':
-                    if out == 'out':
-                        self._out[name] = tmp_p
+            if self.invert:
+                for p in self.config['slider_mapping']:
+                    if len(p.split('|')) != 2:
+                        invert, name, out = p.split('|')
                     else:
-                        self._in[name] = tmp_p
-                else:
-                    if out == 'out':
-                        self._other_out[name] = tmp_p
+                        invert = "+"
+                        name, out = p.split('|')
+                    name = name.lower()
+                    tmp_p = Potentiometer(i, name, out == 'out', invert != "-")
+                    if name != 'other':
+                        if out == 'out':
+                            self._out[name] = tmp_p
+                        else:
+                            self._in[name] = tmp_p
                     else:
-                        self._other_in[name] = tmp_p
+                        if out == 'out':
+                            self._other_out[name] = tmp_p
+                        else:
+                            self._other_in[name] = tmp_p
+                    self.list_of_potentiometers.append(tmp_p)
+                    i += 1
+            else:
+                for p in self.config['slider_mapping']:
+                    if len(p.split('|')) != 2:
+                        invert, name, out = p.split('|')
+                    else:
+                        invert = "+"
+                        name, out = p.split('|')
+                    name = name.lower()
+                    tmp_p = Potentiometer(
+                        i, name, out == 'out', invert == "-")
+                    if name != 'other':
+                        if out == 'out':
+                            self._out[name] = tmp_p
+                        else:
+                            self._in[name] = tmp_p
+                    else:
+                        if out == 'out':
+                            self._other_out[name] = tmp_p
+                        else:
+                            self._other_in[name] = tmp_p
                 self.list_of_potentiometers.append(tmp_p)
                 i += 1
 
@@ -83,20 +104,12 @@ def read_from_serial(ser):
     return split_line
 
 
-"""
-def update_volumes(config, values, pulse):
-    for (p, v) in zip(config.list_of_potentiometers, values):
-        if v <= 0.02:
-            v = 0
-        if v >= 0.98:
-            v = 1
-        p.update_volume(v, pulse)
-"""
-
-
 def update_volumes(config: Configuration, values: list, pulse: pulsectl.Pulse):
     for (p, v) in zip(config.list_of_potentiometers, values):
-        p.update_volume(v)
+        if not p.invert:
+            p.update_volume(v)
+        else:
+            p.update_volume(1 - v)
     # out
     for sink in pulse.sink_input_list():
         tmp_name = sink.proplist.get('application.process.binary').lower()
@@ -125,9 +138,12 @@ def main():
 
     while 1:  # True: podobno szybciej
         line = read_from_serial(ser)
+        # print(line)
         values = [round(values_into_percent(int(x), 1023), 3) for x in line]
+        # print(values)
         update_volumes(c, values, pulse)
         # sleep(0.001)
+        # print()
 
 
 if __name__ == "__main__":
