@@ -1,5 +1,5 @@
 number_of_sliders: 7
-invert: rue
+invert: True
 slider_mapping:
 #case INsensitive
 #in
@@ -7,11 +7,11 @@ slider_mapping:
   - -|spotify|out
   - chrome|out
   - discord|out
-  - other|out
-  #out
   - discord|in
-  - teams|in
+  - other|out
   - other|in
+  #out
+  - teams|in
   #TODO
   #grupowanie
   #main|in/out
