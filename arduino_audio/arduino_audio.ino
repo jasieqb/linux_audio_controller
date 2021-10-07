@@ -15,7 +15,6 @@ void loop() {
   updateSliderValues();
   sendSliderValues(); // Actually send data (all the time)
   // printSliderValues(); // For debug
-  Serial.flush();
   delay(10);
 }
 
@@ -37,6 +36,7 @@ void sendSliderValues() {
   }
   
   Serial.println(builtString);
+  Serial.flush();
 }
 
 void printSliderValues() {
