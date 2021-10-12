@@ -1,4 +1,5 @@
 number_of_sliders: 7
+baud: 115200
 invert: True
 slider_mapping:
 #case INsensitive
@@ -10,7 +11,6 @@ slider_mapping:
   - discord|in
   - other|out
   - other|in
-  #out
   - teams|in
   #TODO
   #grupowanie

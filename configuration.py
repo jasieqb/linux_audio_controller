@@ -15,6 +15,7 @@ class Configuration():
         with open(conf_file, 'r') as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
             self.invert = self.config['invert']
+            self.baud = self.config['baud']
             self.number_of_sliders = self.config['number_of_sliders']
             i = 0
             if self.invert:

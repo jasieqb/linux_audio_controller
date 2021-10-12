@@ -8,7 +8,7 @@ void setup() {
     pinMode(analogInputs[i], INPUT);
   }
 
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 void loop() {
@@ -20,7 +20,7 @@ void loop() {
 
 void updateSliderValues() {
   for (int i = 0; i < NUM_SLIDERS; i++) {
-     analogSliderValues[i] = analogRead(analogInputs[i]);
+     analogSliderValues[i] = (int)((analogRead(analogInputs[i])/1023.0)*999);
   }
 }
 
@@ -34,7 +34,6 @@ void sendSliderValues() {
       builtString += String("|");
     }
   }
-  
   Serial.println(builtString);
   Serial.flush();
 }
