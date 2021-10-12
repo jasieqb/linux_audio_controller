@@ -15,4 +15,8 @@ slider_mapping:
   #TODO
   #grupowanie
   #main|in/out
+insensitiveIN:
+  - obs
+  - python3.9
+insensitiveOUT:
   #whole name of speakers

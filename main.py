@@ -30,7 +30,7 @@ def update_volumes(config: Configuration, values: list, pulse: pulsectl.Pulse):
         tmp_name = sink.proplist.get('application.process.binary').lower()
         if tmp_name in config._out:
             pulse.volume_set_all_chans(sink, config._out[tmp_name].volume)
-        elif config._other_out:
+        elif config._other_out and tmp_name not in config.insensitiveOUT:
             pulse.volume_set_all_chans(
                 sink, config._other_out['other'].volume)
     # in
@@ -38,7 +38,7 @@ def update_volumes(config: Configuration, values: list, pulse: pulsectl.Pulse):
         tmp_name = source.proplist.get('application.process.binary').lower()
         if tmp_name in config._in:
             pulse.volume_set_all_chans(source, config._in[tmp_name].volume)
-        elif config._other_in:
+        elif config._other_in and tmp_name not in config.insensitiveIN:
             pulse.volume_set_all_chans(
                 source, config._other_in['other'].volume)
 
@@ -61,7 +61,10 @@ def main():
         print(line)
         values = [round(values_into_percent(int(x), 999), 3) for x in line]
         #print(values)
-        update_volumes(c, values, pulse)
+        try:
+            update_volumes(c, values, pulse)
+        except pulsectl.pulsectl.PulseOperationFailed as e:
+            print("Problem with PulseAudio server connection")
         #sleep(0.001)
         i += 1
         # print(i)

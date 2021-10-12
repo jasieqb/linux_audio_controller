@@ -17,6 +17,8 @@ class Configuration():
             self.invert = self.config['invert']
             self.baud = self.config['baud']
             self.number_of_sliders = self.config['number_of_sliders']
+            self.insensitiveIN = self.config['insensitiveIN']
+            self.insensitiveOUT = self.config['insensitiveOUT']
             i = 0
             if self.invert:
                 for p in self.config['slider_mapping']:
