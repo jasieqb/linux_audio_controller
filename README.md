@@ -35,3 +35,5 @@
     # skipped streams IN 
     insensitiveOUT: [] #empty array
 ```    
+##
+arduino_audio from [deej](https://github.com/omriharel/deej/blob/master/arduino/deej-5-sliders-vanilla/deej-5-sliders-vanilla.ino) with somne changes 
