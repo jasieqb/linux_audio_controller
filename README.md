@@ -9,7 +9,6 @@
 * add physical audio devices binding by name
 * GUI and system tray widget
 * docs
-<<<<<<< HEAD
 
 ## example config file:
 ```yaml
@@ -36,7 +35,3 @@
     # skipped streams IN 
     insensitiveOUT: [] #empty array
 ```    
-=======
-##
-arduino_audio from [deej](https://github.com/omriharel/deej/blob/master/arduino/deej-5-sliders-vanilla/deej-5-sliders-vanilla.ino) with somne changes 
->>>>>>> abe33bc73e4dd9e30bed2e6f0767dc54a61c9ad5
