@@ -46,6 +46,7 @@ def update_volumes(config: Configuration, values: list, pulse: pulsectl.Pulse):
 def main():
     c = Configuration()
     c.load_configuration('config.yaml')
+    print(c.config)
     c.print_config()        #print(values)
     ser = serial.Serial(port='/dev/ttyUSB0', baudrate=c.baud)
     ser.readline()

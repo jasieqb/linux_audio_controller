@@ -18,5 +18,5 @@ slider_mapping:
 insensitiveIN:
   - obs
   - python3.9
-insensitiveOUT:
+insensitiveOUT: [] #array
   #whole name of speakers
