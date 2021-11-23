@@ -3,8 +3,6 @@ baud: 115200
 invert: True
 slider_mapping:
 #case INsensitive
-#in
-#-
   - -|spotify|out
   - chrome|out
   - discord|out
@@ -12,11 +10,8 @@ slider_mapping:
   - other|out
   - other|in
   - teams|in
-  #TODO
-  #grupowanie
-  #main|in/out
 insensitiveIN:
   - obs
   - python3.9
 insensitiveOUT: [] #array
-  #whole name of speakers
+
